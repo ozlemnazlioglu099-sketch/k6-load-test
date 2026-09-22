@@ -1,114 +1,200 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# K6 Load Test Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Yük testi senaryolarında kullanılmak üzere hazırlanmış, NestJS ve PostgreSQL tabanlı örnek backend uygulaması. Uygulama; kullanıcı oluşturma/listeleme, basit kimlik doğrulama, sağlık kontrolü ve çalışma zamanı metriklerini HTTP üzerinden sunar.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Teknolojiler
 
-## Description
+- [NestJS](https://nestjs.com/) 12
+- TypeScript
+- PostgreSQL
+- `pg` bağlantı havuzu
+- Vitest ve Supertest
+- [Artillery](https://www.artillery.io/) (yük testi bağımlılığı)
+- NestJS Observe (gözlemlenebilirlik)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Gereksinimler
 
-## Project setup
+- Node.js 20 veya üzeri
+- npm
+- PostgreSQL 14 veya üzeri
 
-```bash
-$ npm install
-```
+## Kurulum
 
-## Compile and run the project
+1. Backend klasörüne geçin:
 
-```bash
-# development
-$ npm run start
+   ```bash
+   cd backend
+   ```
 
-# watch mode
-$ npm run start:dev
+2. Bağımlılıkları yükleyin:
 
-# production mode
-$ npm run start:prod
-```
+   ```bash
+   npm install
+   ```
 
-## Run tests
+3. PostgreSQL bağlantı adresini `.env` dosyasında tanımlayın:
 
-```bash
-# unit tests
-$ npm run test
+   ```env
+   DATABASE_URL=postgresql://kullanici:sifre@localhost:5432/loadtest
+   PORT=3000
+   ```
 
-# e2e tests
-$ npm run test:e2e
+   `PORT` belirtilmezse uygulama `3000` portunda başlar.
 
-# test coverage
-$ npm run test:cov
-```
+4. Uygulamanın kullandığı tabloyu oluşturun:
 
-## Deployment
+   ```sql
+   CREATE TABLE users (
+     id SERIAL PRIMARY KEY,
+     name VARCHAR(255) NOT NULL,
+     email VARCHAR(255) UNIQUE NOT NULL,
+     password TEXT NOT NULL
+   );
+   ```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Çalıştırma
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Geliştirme
+npm run start
+
+# Dosya değişikliklerini izleyerek geliştirme
+npm run start:dev
+
+# Production derlemesi ve çalıştırma
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Uygulama başladıktan sonra varsayılan adres: <http://localhost:3000>
 
-## Observability
+## API
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+### Sağlık kontrolü
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+```http
+GET /health
+```
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+Örnek yanıt:
 
-## Resources
+```json
+{
+  "status": "ok"
+}
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Kullanıcıları listeleme
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```http
+GET /users
+```
 
-## Support
+### Kullanıcı görüntüleme
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```http
+GET /users/:id
+```
 
-## Stay in touch
+`id` sayısal olmalıdır. Kayıt bulunamazsa `null` döner.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Kullanıcı oluşturma
 
-## License
+```http
+POST /users
+Content-Type: application/json
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+İstek gövdesi:
+
+```json
+{
+  "name": "Ada Lovelace",
+  "email": "ada@example.com",
+  "password": "change-me"
+}
+```
+
+Yanıt, oluşturulan kullanıcının `id`, `name` ve `email` alanlarını içerir; parola yanıt gövdesine dahil edilmez.
+
+### Giriş
+
+```http
+POST /auth/login
+Content-Type: application/json
+```
+
+İstek gövdesi:
+
+```json
+{
+  "email": "ada@example.com",
+  "password": "change-me"
+}
+```
+
+Kimlik bilgileri geçerliyse kullanıcı bilgileriyle birlikte başarı yanıtı döner. Geçersiz bilgiler için `401 Unauthorized` döndürülür.
+
+### Uygulama metrikleri
+
+```http
+GET /metrics
+```
+
+Yanıt aşağıdaki bilgileri içerir:
+
+- Process bilgileri: PID ve uptime
+- Bellek kullanımı: RSS, heap kullanımı ve heap toplamı
+- CPU kullanım yüzdesi
+- Event loop gecikmesi: ortalama, maksimum ve p95
+- PostgreSQL havuzu: toplam, boşta ve bekleyen bağlantılar ile havuz limiti
+
+## Test ve kalite kontrolleri
+
+```bash
+# Birim testleri
+npm run test
+
+# Testleri izleme modunda çalıştırma
+npm run test:watch
+
+# E2E testleri
+npm run test:e2e
+
+# Kapsama raporu
+npm run test:cov
+
+# Lint
+npm run lint
+
+# Formatlama
+npm run format
+```
+
+## Proje yapısı
+
+```text
+src/
+├── auth/       # Giriş endpoint'i ve kimlik doğrulama servisi
+├── database/   # PostgreSQL bağlantı havuzu
+├── metrics/    # Çalışma zamanı ve veritabanı metrikleri
+├── users/      # Kullanıcı endpoint'leri ve servisi
+├── app.module.ts
+└── main.ts
+test/           # E2E testleri
+```
+
+## Gözlemlenebilirlik
+
+Uygulama `@nestjs/observe` ile enstrümante edilmiştir. `src/app.module.ts` içindeki Observe yapılandırmasında kullanılan uygulama anahtarlarını gerçek ortamda güvenli bir secret yönetimi çözümünden sağlayın; anahtarları kaynak koduna veya sürüm kontrolüne eklemeyin.
+
+## Güvenlik notları
+
+- `.env` dosyasını sürüm kontrolüne eklemeyin.
+- Üretim ortamında kullanıcı parolalarını düz metin olarak saklamayın; güçlü bir parola hash algoritması kullanın.
+- Üretimde TLS, istek doğrulama, rate limiting ve uygun kimlik doğrulama/yetkilendirme katmanlarını ekleyin.
+- Yük testlerini yalnızca kontrol ettiğiniz ortamlarda ve ilgili ekiplerin onayıyla çalıştırın.
+
+## Lisans
+
+Bu proje şu anda `UNLICENSED` olarak yapılandırılmıştır.
