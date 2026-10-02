@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../load-testing-k6"
+		}
+	],
+	"settings": {}
+}
